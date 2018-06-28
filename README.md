@@ -1,2 +1,2 @@
-Basically i took advantage of java.util.concurrent.atomic package to perform all kinds of atomic operation. 
-These atomic operations are essential in lock mechanism.
+implemented features include ReentrantLock,Semaphore,CountDownLatch.
+Features like fair-lock are on the way...
