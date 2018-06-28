@@ -16,11 +16,7 @@ public class CountDownLatch {
 		
 		public void await() {
 			while (atomicOps.get()>0) {
-				try {
-					Thread.currentThread().sleep(20);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				
 			}
 		}
 }
