@@ -9,22 +9,17 @@ public class FairLock extends QueuedLock{
 	
 	@Override
 	public boolean tryLock() {
-		Thread curr = Thread.currentThread();
-		if(waitingList.peek()==null && )
-		return false;
+		return false;//try lock runs contrary to the concept of a fair lock
 	}
 
 	@Override
 	public boolean tryLock(long time, TimeUnit unit) {
-		// TODO Auto-generated method stub
-		return false;
+		return false;//try lock runs contrary to the concept of a fair lock
 	}
 
 	@Override
 	public void Lock() {
-		Thread curr = Thread.currentThread();
-		Enqueue(new Node(curr,0));
-		QueuedLock();
+		QueuedLock(new Node(0));
 	}
 
 	@Override

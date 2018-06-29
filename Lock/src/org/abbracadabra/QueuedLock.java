@@ -7,7 +7,8 @@ abstract class QueuedLock extends CommonLock{
 
 	Queue waitingList = new ConcurrentLinkedQueue<Node>();
 	
-	public void QueuedLock() {
+	public void QueuedLock(Node node) {
+		waitingList.add(node);
 		Thread curr = Thread.currentThread();
 		while(true) {
 			if(curr == ((Node) waitingList.peek()).t && tryLock()) {

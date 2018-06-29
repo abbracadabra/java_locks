@@ -34,6 +34,10 @@ public abstract class CommonLock {
 			this.t = t;
 			this.status = status;
 		}
+		Node(int status){
+			this.t = Thread.currentThread();
+			this.status = status;
+		}
 		Thread t;
 		int status;
 	}

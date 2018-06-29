@@ -41,9 +41,7 @@ public class UnfairLock extends QueuedLock{
 	@Override
 	public void Lock() {
 		if(!tryLock()) {
-			Thread curr = Thread.currentThread();
-			Enqueue(new Node(curr, 0));
-			QueuedLock();
+			QueuedLock(new Node(0));
 		}
 	}
 
