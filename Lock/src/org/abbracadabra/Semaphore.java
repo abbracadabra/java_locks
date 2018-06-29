@@ -8,6 +8,10 @@ public class Semaphore {
 	private AtomicLong atomicOps = new AtomicLong(0L);
 
 	public Semaphore(long num) {
+		this(num, false);
+	}
+	
+	public Semaphore(long num,boolean fair) {
 		atomicOps.set(num);
 	}
 
