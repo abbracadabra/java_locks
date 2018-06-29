@@ -1,13 +1,13 @@
 package org.abbracadabra;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.abbracadabra.Condition.Node;
 
-public class RaceLock extends CommonLock{
+public class RaceLock extends CommonLock {
 
+	protected final AtomicBoolean atomicOps = new AtomicBoolean(true);
+	
 	@Override
 	public boolean tryLock() {
 		Thread curr = Thread.currentThread();
@@ -16,7 +16,7 @@ public class RaceLock extends CommonLock{
 			return true;
 		} else if (atomicOps.compareAndSet(true, false)) {
 			setCurrOwnerThread(curr);
-			count++;
+			count=1;
 			return true;
 		} else {
 			return false;
@@ -37,12 +37,14 @@ public class RaceLock extends CommonLock{
 				}
 			}
 		}
-	
+
 	}
 
 	@Override
 	public void Lock() {
-		// TODO Auto-generated method stub
+		while (!tryLock()) {
+
+		}
 	}
 
 	@Override
@@ -60,5 +62,10 @@ public class RaceLock extends CommonLock{
 			}
 		}
 	}
-	
+
+	@Override
+	Condition newCondition() {
+		return new ConditionR(this);
+	}
+
 }

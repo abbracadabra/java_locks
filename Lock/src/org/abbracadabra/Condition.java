@@ -1,5 +1,7 @@
 package org.abbracadabra;
 
+import org.abbracadabra.CommonLock.Node;
+
 abstract class Condition {
 
 	abstract void await();
@@ -12,9 +14,5 @@ abstract class Condition {
 	
 	protected Node tail;
 	
-	static class Node{
-		Thread t;
-		Node prev;
-		Node next;
-	}
+
 }

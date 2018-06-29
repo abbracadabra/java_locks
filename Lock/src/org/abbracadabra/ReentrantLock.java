@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ReentrantLock {
 
-	private CommonLock handler = null;
+	private final CommonLock handler;
 	
 	enum LockType{
 		fair,
@@ -37,25 +37,11 @@ public class ReentrantLock {
 	}
 
 	public void Lock() {
-		while (!tryLock()) {
-			
-		}
+		handler.Lock();
 	}
 	
 	public Condition newCondition() {
-		Condition c = null ;
-		switch (type) {
-		case fair:
-			c = new QueueCondition((QueuedLock) handler);
-			break;
-		case unfair:
-			c = new QueueCondition((QueuedLock) handler);
-			break;
-		case race:
-			c = new ConditionC((RaceLock) handler);
-			break;
-		}
-		return c;
+		return handler.newCondition();
 	}
 
 	public boolean tryLock() {
@@ -67,6 +53,5 @@ public class ReentrantLock {
 	}
 
 	public void unLock() {}
-	
 
 }

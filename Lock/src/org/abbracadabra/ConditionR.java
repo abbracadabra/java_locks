@@ -9,34 +9,32 @@ import java.util.concurrent.locks.LockSupport;
 import org.abbracadabra.CommonLock.Node;
 
 
-public class QueueCondition extends Condition{
+public class ConditionR extends Condition {
 	
 	Queue waitingList = new ConcurrentLinkedQueue<Node>();
-	
-	final QueuedLock lock ;
-	
-	public QueueCondition(QueuedLock lock) {
+
+	final RaceLock lock;
+
+	public ConditionR(RaceLock lock) {
 		this.lock = lock;
 	}
-	
+
 	@Override
 	void signalAll() {
 		Node n;
 		while((n=(Node) waitingList.poll())!=null) {
-			lock.Enqueue(head);
 			LockSupport.unpark(head.t);
 		}
 	}
-	
+
 	@Override
 	void signal() {
 		Node head = (Node) waitingList.poll();//poll the first
 		if(head != null) {
-			lock.Enqueue(head);
 			LockSupport.unpark(head.t);
 		}
 	}
-	
+
 	@Override
 	void await() {
 		// TODO Auto-generated method stub
@@ -48,6 +46,7 @@ public class QueueCondition extends Condition{
 		this.lock.unLock();//surrender the lock before parked
 		waitingList.add(new Node(curr,0));
 		LockSupport.park();//block this thread until signaled
-		this.lock.QueuedLock();//signaled,now race for the lock
+		this.lock.Lock();//signaled,now race for the lock
 	}
-};
+
+}

@@ -5,11 +5,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.abbracadabra.Condition.Node;
+
 public abstract class CommonLock {
 
 	volatile long count = 0;
-	
-	protected AtomicBoolean atomicOps = new AtomicBoolean(true);
 	
 	protected transient Thread currOwnerThread;// current thread holding the lock
 	
@@ -29,5 +29,14 @@ public abstract class CommonLock {
 		this.currOwnerThread = currOwnerThread;
 	}
 	
+	static class Node{
+		Node(Thread t,int status){
+			this.t = t;
+			this.status = status;
+		}
+		Thread t;
+		int status;
+	}
 
+	abstract Condition newCondition();
 }
