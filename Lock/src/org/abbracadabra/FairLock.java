@@ -1,12 +1,9 @@
 package org.abbracadabra;
 
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FairLock extends QueuedLock{
 
-	protected final AtomicBoolean atomicOps = new AtomicBoolean(true);
-	
 	@Override
 	public boolean tryLock() {
 		return false;//try lock runs contrary to the concept of a fair lock
@@ -19,17 +16,22 @@ public class FairLock extends QueuedLock{
 
 	@Override
 	public void Lock() {
-		QueuedLock(new Node(0));
+		Enqueue(new Node(1,0));
 	}
 
 	@Override
 	public void unLock() {
-		waitingList.poll();
-	}
-
-	@Override
-	Condition newCondition() {
-		return new QueueCondition(this);
+		Thread curr = Thread.currentThread();
+		if (curr != getCurrOwnerThread()) {
+			throw new RuntimeException();
+		} else {
+			if (atomicOps.get()>1) {
+				atomicOps.decrementAndGet();
+			} else {
+				setCurrOwnerThread(null);
+				clearCount();
+			}
+		}
 	}
 
 }

@@ -1,15 +1,12 @@
 package org.abbracadabra;
 
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
-import org.abbracadabra.Condition.Node;
 
 public abstract class CommonLock {
-
-	volatile long count = 0;
+	
+	protected final AtomicLong atomicOps = new AtomicLong();
 	
 	protected transient Thread currOwnerThread;// current thread holding the lock
 	
@@ -21,6 +18,14 @@ public abstract class CommonLock {
 	
 	public abstract void unLock();
 	
+	public long getCount() {
+		return atomicOps.get();
+	}
+	
+	public void clearCount() {
+		atomicOps.set(0L);
+	}
+	
 	public Thread getCurrOwnerThread() {
 		return currOwnerThread;
 	}
@@ -30,17 +35,33 @@ public abstract class CommonLock {
 	}
 	
 	static class Node{
-		Node(Thread t,int status){
+		Node(Thread t,long count,int status){
 			this.t = t;
 			this.status = status;
+			this.count = count;
 		}
-		Node(int status){
+		Node(long count,int status){
 			this.t = Thread.currentThread();
 			this.status = status;
+			this.count = count;
 		}
 		Thread t;
 		int status;
+		long count;
 	}
 
 	abstract Condition newCondition();
+	
+	public static abstract class Condition {
+
+		abstract void await();
+		
+		abstract void signal();
+		
+		abstract void signalAll();
+		
+		protected Node head;
+		
+		protected Node tail;
+	}
 }

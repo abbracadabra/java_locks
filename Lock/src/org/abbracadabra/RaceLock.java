@@ -1,22 +1,24 @@
 package org.abbracadabra;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.LockSupport;
+
+import org.abbracadabra.CommonLock.Node;
 
 
 public class RaceLock extends CommonLock {
 
-	protected final AtomicBoolean atomicOps = new AtomicBoolean(true);
-	
 	@Override
 	public boolean tryLock() {
 		Thread curr = Thread.currentThread();
 		if (curr == getCurrOwnerThread()) {
-			count++;
+			atomicOps.incrementAndGet();
 			return true;
-		} else if (atomicOps.compareAndSet(true, false)) {
+		} else if (atomicOps.compareAndSet(0, 1)) {
 			setCurrOwnerThread(curr);
-			count=1;
 			return true;
 		} else {
 			return false;
@@ -53,19 +55,54 @@ public class RaceLock extends CommonLock {
 		if (curr != getCurrOwnerThread()) {
 			throw new RuntimeException();
 		} else {
-			if (count > 1) {
-				count--;
+			if (atomicOps.get()>1) {
+				atomicOps.decrementAndGet();
 			} else {
-				count = 0;
 				setCurrOwnerThread(null);
-				atomicOps.set(true);
+				clearCount();
 			}
 		}
 	}
 
 	@Override
 	Condition newCondition() {
-		return new ConditionR(this);
+		return new $Condition();
 	}
+	
+	class $Condition extends Condition{
+		
+		Queue conditionWaitingList = new ConcurrentLinkedQueue<Node>();
+
+		@Override
+		void signalAll() {
+			Node n;
+			while((n=(Node) conditionWaitingList.poll())!=null) {
+				LockSupport.unpark(head.t);
+			}
+		}
+
+		@Override
+		void signal() {
+			Node head = (Node) conditionWaitingList.poll();//poll the first
+			if(head != null) {
+				LockSupport.unpark(head.t);
+			}
+		}
+
+		@Override
+		void await() {
+			// TODO Auto-generated method stub
+			Thread curr = Thread.currentThread();
+			if (curr != getCurrOwnerThread()) {
+				throw new RuntimeException();
+			}
+			//long count = lock.count;//a copy of lock count
+			Node n = new Node(curr,getCount(),0);
+			clearCount();//surrender the lock before parked
+			conditionWaitingList.add(n);
+			LockSupport.park();//block this thread until signaled
+			Lock();//signaled,now race for lock
+		}
+}
 
 }

@@ -1,21 +1,17 @@
 package org.abbracadabra;
 
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class UnfairLock extends QueuedLock{
 
-	protected final AtomicBoolean atomicOps = new AtomicBoolean(true);
-	
 	@Override
 	public boolean tryLock() {
 		Thread curr = Thread.currentThread();
 		if (curr == getCurrOwnerThread()) {
-			count++;
+			atomicOps.incrementAndGet();
 			return true;
-		} else if (atomicOps.compareAndSet(true, false)) {
+		} else if (atomicOps.compareAndSet(0, 1)) {
 			setCurrOwnerThread(curr);
-			count=1;
 			return true;
 		} else {
 			return false;
@@ -41,18 +37,22 @@ public class UnfairLock extends QueuedLock{
 	@Override
 	public void Lock() {
 		if(!tryLock()) {
-			QueuedLock(new Node(0));
+			Enqueue(new Node(1,0));
 		}
 	}
 
 	@Override
 	public void unLock() {
-		waitingList.poll();
+		Thread curr = Thread.currentThread();
+		if (curr != getCurrOwnerThread()) {
+			throw new RuntimeException();
+		} else {
+			if (atomicOps.get()>1) {
+				atomicOps.decrementAndGet();
+			} else {
+				setCurrOwnerThread(null);
+				clearCount();
+			}
+		}
 	}
-
-	@Override
-	Condition newCondition() {
-		return new QueueCondition(this);
-	}
-
 }

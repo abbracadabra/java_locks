@@ -2,6 +2,8 @@ package org.abbracadabra;
 
 import java.util.concurrent.TimeUnit;
 
+import org.abbracadabra.CommonLock.Condition;
+
 public class ReentrantLock {
 
 	private final CommonLock handler;
