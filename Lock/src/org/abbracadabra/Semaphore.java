@@ -19,12 +19,12 @@ public class Semaphore {
 		if(num<0) {
 			throw new RuntimeException("illegal argument");
 		}
-		long update = atomicOps.addAndGet(-num);
-		if(update<0) {
-			atomicOps.addAndGet(num);
-			return false;
-		}else {
+		long expect = atomicOps.get();
+		long update = expect-num;
+		if(update>=0 && atomicOps.compareAndSet(expect, update)) {
 			return true;
+		}else {
+			return false;
 		}
 	}
 	
